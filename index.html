@@ -426,7 +426,8 @@
 							//add shot if it was detected by event listener on window
 							if(shoot){
 								shoot = false;
-								shots.push({x: playerpos, y: 340});
+								if(shots.length == 0 || shots[shots.length - 1].frame < frame - 15)
+									shots.push({x: playerpos+12, y: 340, frame: frame});
 							}
 
 							//Animate shots
@@ -663,6 +664,7 @@
 				if(trigger){
 					document.querySelector('#game').style.display = 'block'; 
 					window.setTimeout(drawframe, 100)
+					rungame = true;
 					UnsetActive();
 					document.querySelector("#gametab").classList += " openprogramactive";
 					document.querySelector("#game").style.display = "block";
