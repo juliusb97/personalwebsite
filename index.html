@@ -2,6 +2,9 @@
 <html>
 	<head>
 		<title>Julius OS</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 		<style>
 			body{
 				margin: 0;
@@ -69,7 +72,7 @@
 				position: absolute;
 				left: 2px;
 				bottom: 32px;
-				height: 200px;
+				height: 300px;
 				flex-flow: row;
 				display: none;
 			}
@@ -199,8 +202,8 @@
 			}
 
 			.desktopicon > img{
-				max-width: 128px;
-				max-height: 128px;
+				max-width: 72px;
+				max-height: 72px;
 				display: block;
 				margin-bottom: 5px;
 			}
@@ -313,6 +316,15 @@
 			#turnoff > p{
 				text-align: center;
 			}
+
+			#game{
+				width: 250px;
+				height: 475px;
+			}
+
+			#game .content{
+				display: block;
+			}
 		</style>
 	</head>
 	<body>
@@ -357,6 +369,106 @@
 				<div class="content">
 					<div id="navaddressbar"><span>Address:</span><input type="text" disabled value="http://www.aol.com/"></div>
 					<img style="display: block;" src="aol.png">
+				</div>
+			</div>
+			<div class="window" id="game" style="display: none">
+				<div class="title" id="gameheader">Galaxy Invaders<button class="close" onclick="controlGame(false)">X</button></div>
+				<div class="content">
+					<canvas id="gamecanv" width="200" height="400"></canvas>
+					<span>A, D - Left, Right     Space - Shoot</span>
+					<img id="playerimg" src="ship.png" style="display: none">
+					<img id="enemyimg" src="enemy.png" style="display: none">
+					<img id="galaxyimg" src="galaxy1.png" style="display: none">
+					<img id="shotimg" src="shot.png" style="display: none">
+					<script>
+						let ca = document.querySelector("#gamecanv");
+						let c = ca.getContext("2d");
+
+						let shoot = false;
+						window.addEventListener("keydown", e => {
+							if(e.key == "d"){
+								if(playerpos < 160) playerpos += 8;
+							} else if(e.key == "a"){
+								if(playerpos > 10) playerpos -= 8;
+							} else if(e.key == " "){
+								shoot = true;
+								console.log("space");
+							}
+						})
+
+						function dist(x1, y1, x2, y2){
+							return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+						}
+
+						let playerimg = document.querySelector("#playerimg");
+						let enemyimg = document.querySelector("#enemyimg");
+
+						let playerpos = 80;
+						let shots = [];
+						let enemies = [];
+
+						let score = 0;
+						let frame = 0;
+						let gamespeed = 1;
+						let rungame = true;
+						function drawframe(){
+							c.fillColor = "rgb(0, 0, 0)";
+							c.fillRect(0,0,200,400);
+							c.drawImage(galaxyimg, 0, (frame * gamespeed % 400));
+							c.drawImage(galaxyimg, 0, (frame * gamespeed % 400) - 400);
+
+							c.drawImage(playerimg, playerpos, 350);
+							c.fillStyle = "white";
+							c.font = "18pt VT323";
+							c.fillText("SCORE: " + score.toString().padStart(8, "0"), 30, 30);
+
+							if(shoot){
+								shoot = false;
+								shots.push({x: playerpos, y: 340});
+							}
+
+							for(let shot in shots){
+								shots[shot].y -= 10;
+								c.drawImage(shotimg, shots[shot].x, shots[shot].y);
+							}
+							shots = shots.filter(a => a.y > 0);
+
+							for(let e in enemies){
+								enemies[e].y += 2;
+								c.drawImage(enemyimg, enemies[e].x, enemies[e].y);
+
+								if(dist(playerpos, 350, enemies[e].x, enemies[e].y) < 18){
+									c.fillText("GAME OVER", 55, 150);
+									rungame = false;
+								}
+
+								for(let shot in shots){
+									if(dist(shots[shot].x, shots[shot].y, enemies[e].x, enemies[e].y) < 16) {
+										enemies[e].y = 600;
+										shots[shot].y = -200;
+										score += 100;
+									}
+								}
+							}
+							enemies = enemies.filter(e => e.y < 500);
+
+							if((frame * gamespeed * 2) % 120 == 0){
+								enemies.push({x: Math.random()*500 % 160 + 10, y: 10});
+							}
+
+							frame++;
+							if(rungame)
+								window.requestAnimationFrame(drawframe);
+						}
+						function resetGame(){
+							score = 0;
+							frame = 0;
+							shots = [];
+							enemies = [];
+							playerpos = 80;
+							gamespeed = 1;
+						}
+					</script>
 				</div>
 			</div>
 			<div class="window" id="calc" style="display: none">
@@ -460,6 +572,9 @@
 						<tr>
 							<td onclick="document.querySelector('#turnoff').style.display = 'flex'">Shut down</td>
 						</tr>
+						<tr>
+							<td onclick="controlGame(true)">Galaxy Invaders</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -470,6 +585,7 @@
 				<div class="openprogram" id="contactmetab" style="display: none;">Contact Me</div>
 				<div class="openprogram" id="calctab" style="display: none;">Calculator</div>
 				<div class="openprogram" id="internetnavtab" style="display: none;">Internet Navigator</div>
+				<div class="openprogram" id="gametab" style="display: none;">Galaxy Invaders</div>
 			</div>
 			<div id="clock">
 				17:22
@@ -530,6 +646,23 @@
 			function UnsetActive(){
 				for(let p of document.querySelectorAll(".openprogram"))
 					p.classList = "openprogram";
+			}
+
+			function controlGame(trigger){
+				if(trigger){
+					document.querySelector('#game').style.display = 'block'; 
+					window.setTimeout(drawframe, 100)
+					UnsetActive();
+					document.querySelector("#gametab").classList += " openprogramactive";
+					document.querySelector("#game").style.display = "block";
+					document.querySelector("#gametab").style.display = "inline-block";
+					ToggleStartMenu();
+				} else {
+					rungame = false;
+					document.querySelector("#gametab").classList = "openprogram";
+					document.querySelector("#game").style.display = "none";
+					document.querySelector("#gametab").style.display = "none";
+				}
 			}
 
 			function ToggleStartMenu() {
@@ -605,6 +738,7 @@
 			dragElement(document.querySelector("#contactme"));
 			dragElement(document.querySelector("#calc"));
 			dragElement(document.querySelector("#internetnav"));
+			dragElement(document.querySelector("#game"));
 
 			function dragElement(elmnt) {
 			var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
