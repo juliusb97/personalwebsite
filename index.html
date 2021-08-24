@@ -417,24 +417,31 @@
 							c.drawImage(galaxyimg, 0, (frame * gamespeed % 400));
 							c.drawImage(galaxyimg, 0, (frame * gamespeed % 400) - 400);
 
+							//Fill bg and draw text
 							c.drawImage(playerimg, playerpos, 350);
 							c.fillStyle = "white";
 							c.font = "18pt VT323";
 							c.fillText("SCORE: " + score.toString().padStart(8, "0"), 30, 30);
 
+							//add shot if it was detected by event listener on window
 							if(shoot){
 								shoot = false;
 								shots.push({x: playerpos, y: 340});
 							}
 
+							//Animate shots
 							for(let shot in shots){
 								shots[shot].y -= 10;
 								c.drawImage(shotimg, shots[shot].x, shots[shot].y);
 							}
 							shots = shots.filter(a => a.y > 0);
 
+							//Handle enemies
+							//They fly down the screen
+							//They cause game over of they are near the player
+							//And they die if they are in the vicinity of a shot
 							for(let e in enemies){
-								enemies[e].y += 2;
+								enemies[e].y += 2 * gamespeed;
 								c.drawImage(enemyimg, enemies[e].x, enemies[e].y);
 
 								if(dist(playerpos, 350, enemies[e].x, enemies[e].y) < 18){
@@ -452,11 +459,15 @@
 							}
 							enemies = enemies.filter(e => e.y < 500);
 
-							if((frame * gamespeed * 2) % 120 == 0){
+							//Spawn enemies
+							if((frame * 2) % 120 == 0){
 								enemies.push({x: Math.random()*500 % 160 + 10, y: 10});
 							}
 
+							//game loop
+							//difficulty gets harder over time
 							frame++;
+							if(frame % 1000 == 0) gamespeed += 0.3;
 							if(rungame)
 								window.requestAnimationFrame(drawframe);
 						}
@@ -657,6 +668,7 @@
 					document.querySelector("#game").style.display = "block";
 					document.querySelector("#gametab").style.display = "inline-block";
 					ToggleStartMenu();
+					resetGame();
 				} else {
 					rungame = false;
 					document.querySelector("#gametab").classList = "openprogram";
