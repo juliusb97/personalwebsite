@@ -440,6 +440,17 @@
 								mousedown = true;
 						})
 
+						cc.addEventListener("click", (e) => {
+							let rect = e.target.getBoundingClientRect();
+							let mousex = e.clientX - rect.left; //x position within the element.
+							let mousey = e.clientY - rect.top;  //y position within the element.
+							
+							x.fillStyle = paintcolor;
+							x.beginPath();
+							x.arc(mousex, mousey, brushsize, 0, 2 * 3.141592);
+							x.fill();
+						});					
+
 						cc.addEventListener("mousemove", (e) => {
 							if(mousedown){
 
