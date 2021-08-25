@@ -325,6 +325,28 @@
 			#game .content{
 				display: block;
 			}
+
+			#colors .content {
+				display: block;
+			}
+
+			.colorbox{
+				width: 16px;
+				height: 16px;
+			}
+
+			#colorcontrols {
+				display: flex;
+				align-items: center;
+			}
+
+			#brushsizeinput {
+				max-width: 35px;
+			}
+
+			#rainbowtable{
+				flex-grow: 1;
+			}
 		</style>
 	</head>
 	<body>
@@ -362,6 +384,75 @@
 						If you want to see what I've worked on, visit my <a href="silver1bear">Github Page</a>. <br><br>
 						To contact me, write me at <a href="mailto:Julius.Banke@gmx.de">my Mail address</a>.
 					</p>
+				</div>
+			</div>
+			<div class="window" id="colors">
+				<div class="title" id="colorsheader">Colors<button class="close" onclick="colors(false)">X</button></div>
+				<div class="content">
+					<div style="margin-bottom: 5px;" id="colorcontrols">
+						<label>Brush size: </label><input id="brushsizeinput" type="number" value="12" onchange="brushsize = parseInt(this.value)">
+						<table id="rainbowtable">
+							<tr>
+								<td id="red" class="colorbox"></td>
+								<td id="blue" class="colorbox"></td>
+								<td id="green" class="colorbox"></td>
+								<td id="yellow" class="colorbox"></td>
+								<td id="white" class="colorbox"></td>
+								<td id="black" class="colorbox"></td>
+							</tr>
+						</table>
+					</div>
+					<canvas id="cc" width=600 height=500></canvas>
+					<script>
+						for(let box of document.querySelectorAll(".colorbox")){
+							box.style.background = box.id;
+
+							box.addEventListener("click", (e) => {
+								paintcolor = e.target.id;
+							})
+						}
+
+						let cc = document.querySelector("#cc");
+						let x = cc.getContext("2d");
+
+						let mousedown = false;
+						let brushsize = 10;
+						let paintcolor = "black";
+
+						x.fillStyle = "white";
+						x.fillRect(0,0,600,500);
+
+						cc.addEventListener("mousedown", (e) => {
+							mousedown = true;
+						});
+
+						cc.addEventListener("mouseup", (e) => {
+							mousedown = false;
+						});
+
+						cc.addEventListener("mouseleave", (e) => {
+							mousedown = false;
+						})
+
+						cc.addEventListener("mouseenter", (e) =>{
+							if(e.buttons == 1)
+								mousedown = true;
+						})
+
+						cc.addEventListener("mousemove", (e) => {
+							if(mousedown){
+
+								let rect = e.target.getBoundingClientRect();
+								let mousex = e.clientX - rect.left; //x position within the element.
+								let mousey = e.clientY - rect.top;  //y position within the element.
+
+								x.fillStyle = paintcolor;
+								x.beginPath();
+								x.arc(mousex, mousey, brushsize, 0, 2 * 3.141592);
+								x.fill();
+							}
+						});
+					</script>
 				</div>
 			</div>
 			<div class="window" id="internetnav" style="display: none">
@@ -582,6 +673,9 @@
 							<td onclick="calc(true); ToggleStartMenu()">Calculator</td>
 						</tr>
 						<tr>
+							<td onclick="colors(true); ToggleStartMenu()">Colors</td>
+						</tr>
+						<tr>
 							<td onclick="controlGame(true)">Galaxy Invaders</td>
 						</tr>
 						<tr>
@@ -598,6 +692,7 @@
 				<div class="openprogram" id="calctab" style="display: none;">Calculator</div>
 				<div class="openprogram" id="internetnavtab" style="display: none;">Internet Navigator</div>
 				<div class="openprogram" id="gametab" style="display: none;">Galaxy Invaders</div>
+				<div class="openprogram" id="colorstab" style="display: none;">Colors</div>
 			</div>
 			<div id="clock">
 				17:22
@@ -635,7 +730,6 @@
 			}
 
 			function calcOp(Op){
-
 				switch(Op){
 					case "C":
 						calcStack = [];
@@ -686,6 +780,19 @@
 					startmenu.style.display = "none";
 				} else{
 					startmenu.style.display = "flex";
+				}
+			}
+
+			function colors(trigger){
+				if(trigger){
+					UnsetActive();
+					document.querySelector("#colorstab").classList += " openprogramactive";
+					document.querySelector("#colors").style.display = "block";
+					document.querySelector("#colorstab").style.display = "inline-block";
+				} else {
+					document.querySelector("#colorstab").classList = "openprogram";
+					document.querySelector("#colors").style.display = "none";
+					document.querySelector("#colorstab").style.display = "none";
 				}
 			}
 
@@ -753,6 +860,7 @@
 			dragElement(document.querySelector("#calc"));
 			dragElement(document.querySelector("#internetnav"));
 			dragElement(document.querySelector("#game"));
+			dragElement(document.querySelector("#colors"));
 
 			function dragElement(elmnt) {
 			var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
