@@ -27,6 +27,10 @@
 				--deep-blue: rgb(0, 0, 130);
 			}
 
+			#desktop {
+				height: 100vh;
+			}
+
 			nav{
 				/* display: flex;
 				flex-flow: row; */
@@ -72,7 +76,7 @@
 				position: absolute;
 				left: 2px;
 				bottom: 32px;
-				height: 300px;
+				height: 350px;
 				flex-flow: row;
 				display: none;
 			}
@@ -138,6 +142,9 @@
 			#startmenutable td {
 				border-bottom: 1px solid gray;
 				padding-right: 15px;
+				display: flex;
+				align-items: center;
+				height: 42px;
 			}
 
 			#startmenutable tr:hover{
@@ -164,6 +171,7 @@
 				padding: 3px;
 				cursor: move;
 				user-select: none;
+				display: flex;
 			}
 
 			.close{
@@ -173,6 +181,7 @@
 				margin: 0;
 				padding-right: 2px;
 				font-size: 9pt;
+				margin-left: auto;
 			}
 
 			.content{
@@ -332,8 +341,8 @@
 			}
 
 			.colorbox{
-				width: 16px;
-				height: 16px;
+				width: 32px;
+				height: 32px;
 			}
 
 			#colorcontrols {
@@ -348,11 +357,21 @@
 			#rainbowtable{
 				flex-grow: 1;
 			}
+
+			.icon{
+				height: 16px;
+				margin-right: 3px;
+			}
+
+			.startmenuicon {
+				width: 32px;
+				margin-right: 10px;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="turnoff" style="display: none;"><p>It's now safe to turn off<br> this website.</p></div>
-		<div id="desktop">
+		<div id="desktop" onclick="ToggleStartMenu(false)">
 			<div id="background">
 				<div class="desktopicon" ondblclick="AboutMeWindow(true)">
 					<img src="me.jpg">
@@ -368,7 +387,7 @@
 				</div>
 			</div>
 			<div class="window" id="aboutme" style="display: none;">
-				<div class="title" id="aboutmeheader">About Me<button class="close" onclick="AboutMeWindow(false)">X</button></div>
+				<div class="title" id="aboutmeheader"><img class="icon" src="me.jpg">About Me<button class="close" onclick="AboutMeWindow(false)">X</button></div>
 				<div class="content">
 					<img src="me.jpg" id="me">
 					<p>
@@ -379,7 +398,7 @@
 				</div>
 			</div>
 			<div class="window" id="contactme" style="display: none;">
-				<div class="title" id="contactmeheader">Contact Me<button class="close" onclick="ContactMe(false)">X</button></div>
+				<div class="title" id="contactmeheader"><img class="icon" src="Mail.png">Contact Me<button class="close" onclick="ContactMe(false)">X</button></div>
 				<div class="content">
 					<p>
 						If you want to see what I've worked on, visit my <a href="silver1bear">Github Page</a>. <br><br>
@@ -388,11 +407,23 @@
 				</div>
 			</div>
 			<div class="window" id="colors" style="display: none;">
-				<div class="title" id="colorsheader">Colors<button class="close" onclick="colors(false)">X</button></div>
+				<div class="title" id="colorsheader"><img class="icon" src="colors.png">Colors<button class="close" onclick="colors(false)">X</button></div>
 				<div class="content">
 					<div style="margin-bottom: 5px;" id="colorcontrols">
 						<label>Brush size: </label><input id="brushsizeinput" type="number" value="12" onchange="brushsize = parseInt(this.value)">
-						<table id="rainbowtable">
+						<div style="display: inline-block;">
+							<button onclick="undoDraw()">&#129044;</button>
+							<button onclick="redoDraw()">&#129046;</button>
+						</div>
+						<div>
+							<button id="red" class="colorbox"></button>
+							<button id="blue" class="colorbox"></button>
+							<button id="green" class="colorbox"></button>
+							<button id="yellow" class="colorbox"></button>
+							<button id="white" class="colorbox"></button>
+							<button id="black" class="colorbox"></button>
+						</div>
+						<!-- <table id="rainbowtable">
 							<tr>
 								<td id="red" class="colorbox"></td>
 								<td id="blue" class="colorbox"></td>
@@ -401,7 +432,7 @@
 								<td id="white" class="colorbox"></td>
 								<td id="black" class="colorbox"></td>
 							</tr>
-						</table>
+						</table> -->
 					</div>
 					<canvas id="cc" width=600 height=500></canvas>
 					<script>
@@ -422,6 +453,22 @@
 
 						x.fillStyle = "white";
 						x.fillRect(0,0,600,500);
+						let oldimg = [x.getImageData(0,0,600,500)];
+						let undoCounter = 0;
+
+
+						//TODO: fix
+						function undoDraw(){
+							if(undoCounter > 0) undoCounter--;
+							x.putImageData(oldimg[undoCounter],0,0);
+						}
+
+						function redoDraw(){
+							if(undoCounter < oldimg.length) {
+								x.putImageData(oldimg[undoCounter], 0, 0);
+								undoCounter++;
+							}
+						}
 
 						cc.addEventListener("mousedown", (e) => {
 							mousedown = true;
@@ -444,6 +491,10 @@
 							let rect = e.target.getBoundingClientRect();
 							let mousex = e.clientX - rect.left; //x position within the element.
 							let mousey = e.clientY - rect.top;  //y position within the element.
+
+							oldimg.splice(undoCounter);
+							undoCounter++;
+							oldimg.push(x.getImageData(0,0,600,500));
 							
 							x.fillStyle = paintcolor;
 							x.beginPath();
@@ -468,14 +519,14 @@
 				</div>
 			</div>
 			<div class="window" id="internetnav" style="display: none">
-				<div class="title" id="internetnavheader">Internet Navigator<button class="close" onclick="InternetNav(false)">X</button></div>
+				<div class="title" id="internetnavheader"><img class="icon" src="internetnav.png" style="border: 0 !important;">Internet Navigator<button class="close" onclick="InternetNav(false)">X</button></div>
 				<div class="content">
 					<div id="navaddressbar"><span>Address:</span><input type="text" disabled value="http://www.aol.com/"></div>
 					<img style="display: block;" src="aol.png">
 				</div>
 			</div>
 			<div class="window" id="game" style="display: none">
-				<div class="title" id="gameheader">Galaxy Invaders<button class="close" onclick="controlGame(false)">X</button></div>
+				<div class="title" id="gameheader"><img class="icon" src="ship.png">Galaxy Invaders<button class="close" onclick="controlGame(false)">X</button></div>
 				<div class="content">
 					<canvas id="gamecanv" width="200" height="400"></canvas>
 					<span>A, D - Left, Right     Space - Shoot</span>
@@ -587,7 +638,7 @@
 				</div>
 			</div>
 			<div class="window" id="calc" style="display: none">
-				<div class="title" id="calcheader">Calculator<button class="close" onclick="calc(false)">X</button></div>
+				<div class="title" id="calcheader"><img class="icon" src="calc.png">Calculator<button class="close" onclick="calc(false)">X</button></div>
 				<div class="content" style="display: block;">
 					<input type="text" disabled value="0" id="calcinput">
 					<table id="calctable">
@@ -651,7 +702,7 @@
 				</div>
 			</div>
 			<div class="window" id="whatido" style="display: none;">
-				<div class="title" id="whatidoheader">What I Do<button class="close" onclick="WhatIDo(false)">X</button></div>
+				<div class="title" id="whatidoheader"><img class="icon" src="notepad.png">What I Do<button class="close" onclick="WhatIDo(false)">X</button></div>
 				<div class="content" id="whatidocontent">
 					<p>
 						Currently, I'm doing my Bachelor's at HTW in Dresden.<br><br>
@@ -679,16 +730,16 @@
 				<div>
 					<table id="startmenutable">
 						<tr>
-							<td onclick="InternetNav(true); ToggleStartMenu()">Internet Navigator</td>
+							<td onclick="InternetNav(true); ToggleStartMenu()"><img class="startmenuicon" src="internetnav.png">Internet Navigator</td>
 						</tr>
 						<tr>
-							<td onclick="calc(true); ToggleStartMenu()">Calculator</td>
+							<td onclick="calc(true); ToggleStartMenu()"><img class="startmenuicon" src="calc.png">Calculator</td>
 						</tr>
 						<tr>
-							<td onclick="colors(true); ToggleStartMenu()">Colors</td>
+							<td onclick="colors(true); ToggleStartMenu()"><img class="startmenuicon" src="colors.png">Colors</td>
 						</tr>
 						<tr>
-							<td onclick="controlGame(true)">Galaxy Invaders</td>
+							<td onclick="controlGame(true)"><img class="startmenuicon" src="ship.png">Galaxy Invaders</td>
 						</tr>
 						<tr>
 							<td onclick="document.querySelector('#turnoff').style.display = 'flex'">Shut down</td>
@@ -698,13 +749,13 @@
 			</div>
 			<button onclick="ToggleStartMenu()"><img src="notWindows.png" id="notwindows"><span id="startbuttontext">Start</span></button>
 			<div id="openprograms">
-				<div class="openprogram" id="aboutmetab" style="display: none;">About Me</div>
-				<div class="openprogram" id="whatidotab" style="display: none;">What I Do</div>
-				<div class="openprogram" id="contactmetab" style="display: none;">Contact Me</div>
-				<div class="openprogram" id="calctab" style="display: none;">Calculator</div>
-				<div class="openprogram" id="internetnavtab" style="display: none;">Internet Navigator</div>
-				<div class="openprogram" id="gametab" style="display: none;">Galaxy Invaders</div>
-				<div class="openprogram" id="colorstab" style="display: none;">Colors</div>
+				<div class="openprogram" id="aboutmetab" style="display: none;"><img class="icon" src="me.jpg">About Me</div>
+				<div class="openprogram" id="whatidotab" style="display: none;"><img class="icon" src="notepad.png">What I Do</div>
+				<div class="openprogram" id="contactmetab" style="display: none;"><img class="icon" src="Mail.png">Contact Me</div>
+				<div class="openprogram" id="calctab" style="display: none;"><img class="icon" src="calc.png">Calculator</div>
+				<div class="openprogram" id="internetnavtab" style="display: none;"><img class="icon" src="internetnav.png">Internet Navigator</div>
+				<div class="openprogram" id="gametab" style="display: none;"><img class="icon" src="ship.png">Galaxy Invaders</div>
+				<div class="openprogram" id="colorstab" style="display: none;"><img class="icon" src="colors.png">Colors</div>
 			</div>
 			<div id="clock">
 				17:22
@@ -785,14 +836,17 @@
 				}
 			}
 
-			function ToggleStartMenu() {
+			function ToggleStartMenu(toggle) {
 				let startmenu = document.querySelector("#startmenu");
 
+				if(toggle == undefined)
 				if(startmenu.style.display == "flex"){
 					startmenu.style.display = "none";
 				} else{
 					startmenu.style.display = "flex";
 				}
+				else
+					startmenu.style.display = (toggle) ? "flex" : "none";
 			}
 
 			function colors(trigger){
